@@ -1,0 +1,57 @@
+<div class="player-bar" *ngIf="playerService.currentTrack()">
+
+  <div class="track-info">
+    <div class="info-text">
+      <div class="title">{{ playerService.currentTrack()?.title }}</div>
+      <div class="artist">{{ playerService.currentTrack()?.artist }}</div>
+    </div>
+  </div>
+
+
+  <div class="controls">
+    <div class="buttons">
+
+      <!-- PREVIOUS -->
+      <button class="btn-control" (click)="playerService.previous()">
+        ⏮
+      </button>
+
+      <!-- PLAY / PAUSE -->
+      <button class="btn-play" (click)="playerService.togglePlay()">
+        {{ playerService.state() === 'playing' ? '⏸' : '▶' }}
+      </button>
+
+      <!-- NEXT -->
+      <button class="btn-control" (click)="playerService.next()">
+        ⏭
+      </button>
+
+    </div>
+
+    <div class="progress-container">
+      <span class="time">{{ playerService.currentTime() | duration }}</span>
+
+      <input
+        type="range"
+        class="seek-slider"
+        min="0"
+        [max]="playerService.duration()"
+        [value]="playerService.currentTime()"
+        (input)="onSeek($event)">
+
+      <span class="time">{{ playerService.duration() | duration }}</span>
+    </div>
+  </div>
+
+  <div class="volume-control">
+    <span>🔊</span>
+    <input
+      type="range"
+      min="0"
+      max="1"
+      step="0.01"
+      [value]="playerService.volume()"
+      (input)="onVolumeChange($event)">
+  </div>
+
+</div>

@@ -1,0 +1,60 @@
+<div class="detail-container" *ngIf="!isLoading; else loadingTpl">
+
+  <div *ngIf="track; else notFound">
+    <button class="btn-back" (click)="goBack()">← Retour</button>
+
+    <div class="track-content" *ngIf="!isEditing">
+      <div class="cover-art"><div class="art-icon">🎵</div></div>
+      <div class="info-section">
+        <span class="category-badge">{{ track.category }}</span>
+        <h1 class="title">{{ track.title }}</h1>
+        <h2 class="artist">{{ track.artist }}</h2>
+        <div class="meta-row">
+          <span>📅 {{ track.dateAdded | date:'mediumDate' }}</span>
+        </div>
+        <p class="description">{{ track.description }}</p>
+        <div class="actions-row">
+          <button class="btn-play-big" (click)="play()">▶ Lecture</button>
+          <button class="btn-edit" (click)="enableEdit()">✏️ Modifier</button>
+          <button class="btn-delete" (click)="deleteTrack()">🗑️ Supprimer</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="edit-section" *ngIf="isEditing">
+      <h2>Modifier</h2>
+      <form [formGroup]="editForm" (ngSubmit)="saveEdit()">
+        <div class="form-group"><label>Titre</label><input formControlName="title"></div>
+        <div class="form-group"><label>Artiste</label><input formControlName="artist"></div>
+        <div class="form-group">
+          <label>Catégorie</label>
+          <select formControlName="category">
+            <option value="Pop">Pop</option><option value="Rock">Rock</option>
+            <option value="Rap">Rap</option><option value="Jazz">Jazz</option>
+            <option value="Classique">Classique</option><option value="Electro">Electro</option>
+          </select>
+        </div>
+        <div class="form-group"><label>Description</label><textarea formControlName="description"></textarea></div>
+        <div class="edit-actions">
+          <button type="button" class="btn-cancel" (click)="cancelEdit()">Annuler</button>
+          <button type="submit" class="btn-save">Enregistrer</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+</div>
+
+<ng-template #loadingTpl>
+  <div class="loading-state">
+    <h2>Chargement en cours... ⏳</h2>
+  </div>
+</ng-template>
+
+<ng-template #notFound>
+  <div class="not-found">
+    <h2>Musique introuvable 😢</h2>
+    <p>L'ID demandé n'existe pas ou a été supprimé.</p>
+    <button class="btn-back" (click)="goBack()">Retour à la bibliothèque</button>
+  </div>
+</ng-template>
