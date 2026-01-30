@@ -35,14 +35,15 @@ export class AudioPlayerService {
 
   private _playFile(track: Track) {
     if (track.songUrl) {
-      // track.songUrl ghaykon fih: "/api/songs/files/uuid_song.mp3"
-      // Khassk tzid l host ila kan path relatif
-      const fullUrl = `http://localhost:8080${track.songUrl}`;
+      // Si songUrl contient déjà le chemin complet comme "/api/songs/files/uuid.mp3"
+      const fullUrl = track.songUrl.startsWith('http')
+        ? track.songUrl
+        : `http://localhost:8080${track.songUrl}`;
 
       this.audio.src = fullUrl;
+      this.currentTrack.set(track);
       this.audio.load();
-      this.audio.play();
-      // ...
+      this.audio.play().catch(err => console.error('Erreur lecture audio:', err));
     }
   }
 

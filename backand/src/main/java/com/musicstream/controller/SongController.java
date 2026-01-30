@@ -13,15 +13,38 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.util.List;
 
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.UrlResource;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+
+
 @RestController
 @RequestMapping("/api/songs")
-// @CrossOrigin(origins = "http://localhost:4200")
+@CrossOrigin(origins = "http://localhost:4200")
 public class SongController {
 
     private final SongService songService;
 
     public SongController(SongService songService) {
         this.songService = songService;
+    }
+    @GetMapping("/files/{filename:.+}")
+    public ResponseEntity<Resource> getFile(@PathVariable String filename) {
+        try {
+            Path file = Paths.get("uploads").resolve(filename);
+            Resource resource = new UrlResource(file.toUri());
+
+            if (resource.exists() || resource.isReadable()) {
+                return ResponseEntity.ok()
+                        .contentType(MediaType.parseMediaType("audio/mpeg"))
+                        .body(resource);
+            } else {
+                throw new RuntimeException("Fichier ma-tlaqach");
+            }
+        } catch (Exception e) {
+            throw new RuntimeException("Erreur: " + e.getMessage());
+        }
     }
 
     @GetMapping

@@ -4,11 +4,15 @@ import com.musicstream.dto.SongCreateDTO;
 import com.musicstream.dto.SongDTO;
 import com.musicstream.model.Song;
 import com.musicstream.repository.SongRepository;
+import org.jaudiotagger.audio.AudioFile;
+import org.jaudiotagger.audio.AudioFileIO;
+import org.jaudiotagger.audio.AudioHeader;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.util.StringUtils;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -44,20 +48,59 @@ public class SongService {
                 .collect(Collectors.toList());
     }
 
+//    public SongDTO saveSong(SongCreateDTO createDTO, MultipartFile file) throws IOException {
+//        Song song = new Song();
+//
+//        BeanUtils.copyProperties(createDTO, song);
+//
+//        if (file != null && !file.isEmpty()) {
+//            String fileName = UUID.randomUUID().toString() + "_" + StringUtils.cleanPath(file.getOriginalFilename());
+//            Path targetLocation = this.fileStorageLocation.resolve(fileName);
+//            Files.copy(file.getInputStream(), targetLocation, StandardCopyOption.REPLACE_EXISTING);
+//
+//            song.setSongUrl(fileName);
+//        } else {
+//            throw new IOException("Fichier drouri!");
+//        }
+//
+//        Song savedSong = songRepository.save(song);
+//        return convertToDTO(savedSong);
+//    }
+
     public SongDTO saveSong(SongCreateDTO createDTO, MultipartFile file) throws IOException {
         Song song = new Song();
-
         BeanUtils.copyProperties(createDTO, song);
 
         if (file != null && !file.isEmpty()) {
+            // 1. Sauvegarder le fichier
             String fileName = UUID.randomUUID().toString() + "_" + StringUtils.cleanPath(file.getOriginalFilename());
             Path targetLocation = this.fileStorageLocation.resolve(fileName);
             Files.copy(file.getInputStream(), targetLocation, StandardCopyOption.REPLACE_EXISTING);
 
             song.setSongUrl(fileName);
+
+            // 2. CALCULER LA DURÉE AUTOMATIQUEMENT
+            try {
+                // N9raw fichier li 3ad 7ttina f disque
+                File audioFile = targetLocation.toFile();
+                AudioFile f = AudioFileIO.read(audioFile);
+                AudioHeader audioHeader = f.getAudioHeader();
+
+                // Njibo duration en secondes
+                int durationInSeconds = audioHeader.getTrackLength();
+                song.setDurationSeconds((long) durationInSeconds);
+
+            } catch (Exception e) {
+                System.err.println("Erreur lecture durée audio: " + e.getMessage());
+                // N3tiw 0 par défaut ila w93 mochkil f lecture metadata
+                song.setDurationSeconds(0L);
+            }
+
         } else {
-            throw new IOException("Fichier drouri!");
+            throw new IOException("Fichier obligatoire!");
         }
+
+        // Remarque: dateAdded ghadi t3mmr auto hitach derna @CreationTimestamp f Entity
 
         Song savedSong = songRepository.save(song);
         return convertToDTO(savedSong);

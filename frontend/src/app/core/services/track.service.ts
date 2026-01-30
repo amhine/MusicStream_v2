@@ -1,12 +1,14 @@
 import { Injectable, inject, signal } from '@angular/core';
-import { StorageService } from './storage.service';
+import { HttpClient } from '@angular/common/http';
 import { Track } from '../models/track';
+import { lastValueFrom } from 'rxjs'; // <--- Mohim jiddan bach tkhdem b await
 
 @Injectable({
   providedIn: 'root'
 })
 export class TrackService {
-  private storage = inject(StorageService);
+  private http = inject(HttpClient);
+  private apiUrl = 'http://localhost:8080/api/songs'; // URL Backend
 
   tracks = signal<Track[]>([]);
   loading = signal<boolean>(false);
@@ -16,56 +18,94 @@ export class TrackService {
     this.loadTracks();
   }
 
+  // 1. Charger la liste
   async loadTracks() {
     this.loading.set(true);
     try {
-      const data = await this.storage.getAllTracks();
+      // Kan7awlo Observable l Promise b lastValueFrom
+      const data = await lastValueFrom(this.http.get<Track[]>(this.apiUrl));
       this.tracks.set(data);
     } catch (err) {
-      this.error.set("Erreur chargement");
+      console.error(err);
+      this.error.set("Erreur de connexion au serveur");
     } finally {
       this.loading.set(false);
     }
   }
 
-  async addTrack(track: Track) {
+  // 2. Ajouter
+  async addTrack(track: Track, file: File) {
     this.loading.set(true);
+    const formData = new FormData();
+    formData.append('file', file);
+    const songData = {
+      title: track.title,
+      artist: track.artist,
+      category: track.category,
+      description: track.description
+    };
+    formData.append('song', JSON.stringify(songData));
+
     try {
-      await this.storage.addTrack(track);
-      await this.loadTracks();
+      const savedTrack = await lastValueFrom(this.http.post<Track>(this.apiUrl, formData));
+      this.tracks.update(list => [...list, savedTrack]);
     } catch (err) {
       console.error(err);
-    }
-  }
-
-  async getTrackById(id: number): Promise<Track | undefined> {
-    return this.storage.getTrack(id);
-  }
-  async updateTrack(track: Track) {
-    this.loading.set(true);
-    try {
-      await this.storage.updateTrack(track);
-      await this.loadTracks();
-    } catch (err) {
-      console.error("Erreur update:", err);
-      this.error.set("Impossible de modifier");
+      this.error.set("Erreur d'upload");
     } finally {
       this.loading.set(false);
     }
   }
 
+  // 3. ✅ GET BY ID (Hadi li kant na9sa)
+  async getTrackById(id: number): Promise<Track | undefined> {
+    try {
+      return await lastValueFrom(this.http.get<Track>(`${this.apiUrl}/${id}`));
+    } catch (err) {
+      console.error(err);
+      return undefined;
+    }
+  }
 
+  // 4. ✅ UPDATE (Hadi li kant na9sa)
+  async updateTrack(track: Track): Promise<Track | undefined> {
+    this.loading.set(true);
+    const formData = new FormData();
+    // Hna ma3ndnach fichier f update simple, donc knsyfto ghir JSON
+    // Ila bghiti t-gérer fichier f update, khassk tzid parameter file
+    const songData = {
+      title: track.title,
+      artist: track.artist,
+      category: track.category,
+      description: track.description
+    };
+    formData.append('song', JSON.stringify(songData));
+
+    try {
+      const updated = await lastValueFrom(this.http.put<Track>(`${this.apiUrl}/${track.id}`, formData));
+
+      // Update local list
+      this.tracks.update(list => list.map(t => t.id === track.id ? updated : t));
+      return updated;
+    } catch (err) {
+      console.error(err);
+      this.error.set("Erreur modification");
+      return undefined;
+    } finally {
+      this.loading.set(false);
+    }
+  }
+
+  // 5. DELETE
   async deleteTrack(id: number) {
     this.loading.set(true);
     try {
-      await this.storage.deleteTrack(id);
-      await this.loadTracks();
+      await lastValueFrom(this.http.delete(`${this.apiUrl}/${id}`));
+      this.tracks.update(list => list.filter(t => t.id !== id));
     } catch (err) {
       console.error(err);
-      this.error.set("Erreur lors de la suppression");
     } finally {
       this.loading.set(false);
     }
   }
-
 }

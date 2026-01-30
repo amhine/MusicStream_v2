@@ -20,7 +20,6 @@ export class UploadModalComponent {
 
   isSubmitting = false;
   selectedFile: File | null = null;
-  selectedCover: File | null = null;
 
   uploadForm = this.fb.group({
     title: ['', [Validators.required, Validators.maxLength(50)]],
@@ -50,14 +49,15 @@ export class UploadModalComponent {
       artist: this.uploadForm.value.artist!,
       description: this.uploadForm.value.description || '',
       category: this.uploadForm.value.category!,
-      file: this.selectedFile,
-      cover: this.selectedCover,
-      duration: 0,
-      dateAdded: new Date()
     };
 
-    await this.trackService.addTrack(newTrack);
-    this.isSubmitting = false;
-    this.close.emit();
+    try {
+      await this.trackService.addTrack(newTrack, this.selectedFile);
+      this.close.emit();
+    } catch (error) {
+      console.error('Erreur lors de l\'ajout:', error);
+    } finally {
+      this.isSubmitting = false;
+    }
   }
 }

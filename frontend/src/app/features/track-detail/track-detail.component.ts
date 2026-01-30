@@ -48,8 +48,11 @@ export class TrackDetailComponent implements OnInit {
   }
 
 
-  play(){
-    if (this.track) this.playerService.playTrack(this.track);
+  play() {
+    if (this.track) {
+      // Utiliser le playerService au lieu de créer un nouvel Audio
+      this.playerService.playTrack(this.track);
+    }
   }
 
   goBack() {
@@ -80,20 +83,31 @@ export class TrackDetailComponent implements OnInit {
     this.isEditing = false;
   }
 
-  async saveEdit() {
+  saveEdit() {
     if (this.editForm.valid && this.track) {
+
+      // Khoud l-valeurs mn Formulaire
+      const formValue = this.editForm.value;
+
+      // Créer l'objet updatedTrack b tariqa safe (bach t-eviter null)
       const updatedTrack: Track = {
-        ...this.track,
-        title: this.editForm.value.title!,
-        artist: this.editForm.value.artist!,
-        category: this.editForm.value.category!,
-        description: this.editForm.value.description || ''
+        ...this.track, // Hafed 3la id w filePath dyl qdim
+
+        // Hna kanqolo: Ila kan null, 3tih '' (chaine vide)
+        title: formValue.title || '',
+        artist: formValue.artist || '',
+        category: formValue.category || '',
+        description: formValue.description || ''
       };
 
-      await this.trackService.updateTrack(updatedTrack);
-      this.track = updatedTrack;
-      this.isEditing = false;
-      this.cdr.detectChanges();
+      // Appel l Service
+      this.trackService.updateTrack(updatedTrack).then(res => {
+        this.track = res;
+        this.isEditing = false;
+        // alert('Mise à jour réussie!'); // Optionnel
+      }).catch(err => {
+        console.error(err);
+      });
     }
   }
 }

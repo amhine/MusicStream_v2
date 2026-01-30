@@ -9,7 +9,7 @@
     <!-- Image -->
     <div class="card-image">
       <div class="placeholder-art">🎵</div>
-      <span class="duration-badge">{{ track.duration | duration }}</span>
+      <span class="duration-badge">{{ (track.duration || 0) | duration }}</span>
     </div>
 
     <!-- Infos -->
