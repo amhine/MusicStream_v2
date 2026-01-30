@@ -1,52 +1,58 @@
-import { Injectable } from '@angular/core';
-import { openDB, DBSchema, IDBPDatabase } from 'idb';
+import { Injectable, inject, signal } from '@angular/core';
+import { HttpClient } from '@angular/common/http'; // IMPORTANT
 import { Track } from '../models/track';
-
-interface MusicDB extends DBSchema {
-  tracks: {
-    key: number;
-    value: Track;
-  };
-}
+import { firstValueFrom } from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
 })
-export class StorageService {
-  private dbPromise: Promise<IDBPDatabase<MusicDB>>;
+export class TrackService {
+  private http = inject(HttpClient); // Injecter HttpClient
+  private apiUrl = 'http://localhost:8080/api/songs'; // URL Backend
+
+  tracks = signal<Track[]>([]);
+  loading = signal<boolean>(false);
 
   constructor() {
-    this.dbPromise = openDB<MusicDB>('MusicStreamDB', 1, {
-      upgrade(db) {
-        if (!db.objectStoreNames.contains('tracks')) {
-          db.createObjectStore('tracks', { keyPath: 'id', autoIncrement: true });
-        }
-      },
-    });
+    this.loadTracks();
   }
 
-  async addTrack(track: Track): Promise<number> {
-    const db = await this.dbPromise;
-    return db.add('tracks', track);
+  async loadTracks() {
+    this.loading.set(true);
+    try {
+      // Récupérer la liste depuis Spring Boot
+      const data = await firstValueFrom(this.http.get<Track[]>(this.apiUrl));
+      this.tracks.set(data);
+    } catch (err) {
+      console.error("Erreur chargement API", err);
+    } finally {
+      this.loading.set(false);
+    }
   }
 
-  async getAllTracks(): Promise<Track[]> {
-    const db = await this.dbPromise;
-    return db.getAll('tracks');
-  }
+  // C'est ici que ça change : FORM DATA pour l'upload
+  async addTrack(track: Track) {
+    this.loading.set(true);
+    try {
+      const formData = new FormData();
+      formData.append('title', track.title);
+      formData.append('artist', track.artist);
+      formData.append('category', track.category);
 
-  async getTrack(id: number): Promise<Track | undefined> {
-    const db = await this.dbPromise;
-    return db.get('tracks', id);
-  }
+      // On envoie le fichier récupéré dans le formulaire
+      if (track.file instanceof File) {
+        formData.append('file', track.file);
+      }
 
-  async deleteTrack(id: number): Promise<void> {
-    const db = await this.dbPromise;
-    return db.delete('tracks', id);
-  }
-  async updateTrack(track: Track): Promise<number> {
-    const db = await this.dbPromise;
-    return db.put('tracks', track);
-  }
+      // Envoi POST vers Spring Boot
+      await firstValueFrom(this.http.post(this.apiUrl, formData));
 
+      // Recharger la liste
+      await this.loadTracks();
+    } catch (err) {
+      console.error("Erreur upload API", err);
+    } finally {
+      this.loading.set(false);
+    }
+  }
 }

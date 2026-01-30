@@ -34,14 +34,16 @@ export class AudioPlayerService {
   }
 
   private _playFile(track: Track) {
-    if (!track.file) return;
-    const url = URL.createObjectURL(track.file);
-    this.audio.src = url;
-    this.audio.load();
-    this.audio.play().then(() => {
-      this.currentTrack.set(track);
-      this.state.set('playing');
-    }).catch(e => console.error(e));
+    if (track.songUrl) {
+      // track.songUrl ghaykon fih: "/api/songs/files/uuid_song.mp3"
+      // Khassk tzid l host ila kan path relatif
+      const fullUrl = `http://localhost:8080${track.songUrl}`;
+
+      this.audio.src = fullUrl;
+      this.audio.load();
+      this.audio.play();
+      // ...
+    }
   }
 
   togglePlay() {
