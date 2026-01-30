@@ -25,11 +25,17 @@ public class SongService {
 
     private final Path fileStorageLocation;
 
-    public SongService(SongRepository songRepository) throws IOException {
+    public SongService(SongRepository songRepository) {
         this.songRepository = songRepository;
-
         this.fileStorageLocation = Paths.get("uploads").toAbsolutePath().normalize();
-        Files.createDirectories(this.fileStorageLocation);
+        try {
+            if (!Files.exists(this.fileStorageLocation)) {
+                Files.createDirectories(this.fileStorageLocation);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+            throw new RuntimeException("Mochkil f creation dyal dossier uploads", e);
+        }
     }
 
     public List<SongDTO> getAllSongs() {
