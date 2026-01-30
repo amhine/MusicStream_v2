@@ -16,7 +16,7 @@ export class TrackFiltersComponent {
   searchTerm: string = '';
   selectedCategory: string = '';
 
-  categories = ['Pop', 'Rock', 'Rap', 'Jazz', 'Classique', 'Electro'];
+  categories = ['POP', 'ROCK', 'RAP', 'JAZZ', 'CLASSIQUE'];
 
   onSearchChange() {
     this.search.emit(this.searchTerm);
