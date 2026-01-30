@@ -1,0 +1,38 @@
+
+services:
+  postgres-db:
+    image: postgres:15
+    container_name: musicstream_db
+    environment:
+      POSTGRES_DB: musicstream_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: nihad
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  backend:
+    build: ./backand
+    container_name: musicstream_api
+    ports:
+      - "8080:8080"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres-db:5432/musicstream_db
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: nihad
+    volumes:
+      - ./uploads:/app/uploads
+    depends_on:
+      - postgres-db
+
+  frontend:
+    build: ./frontend
+    container_name: musicstream_ui
+    ports:
+      - "4200:80"
+    depends_on:
+      - backend
+
+volumes:
+  postgres_data:
