@@ -21,7 +21,7 @@ import java.nio.file.Paths;
 
 @RestController
 @RequestMapping("/api/songs")
-@CrossOrigin(origins = "http://localhost:4200")
+@CrossOrigin(origins = {"http://localhost:4200", "http://localhost:5173"})
 public class SongController {
 
     private final SongService songService;

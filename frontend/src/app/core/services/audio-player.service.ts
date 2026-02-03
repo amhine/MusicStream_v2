@@ -35,10 +35,14 @@ export class AudioPlayerService {
 
   private _playFile(track: Track) {
     if (track.songUrl) {
-      // Si songUrl contient déjà le chemin complet comme "/api/songs/files/uuid.mp3"
+
+      const baseUrl = 'http://localhost:8080/api/songs/files';
+
       const fullUrl = track.songUrl.startsWith('http')
         ? track.songUrl
-        : `http://localhost:8080${track.songUrl}`;
+        : `${baseUrl}/${track.songUrl}`;
+
+      console.log('URL demandée :', fullUrl); // Doit afficher : .../api/songs/files/uuid.mp3
 
       this.audio.src = fullUrl;
       this.currentTrack.set(track);
