@@ -2,7 +2,7 @@ import { expect, describe, it, beforeEach } from 'vitest';
 import { TestBed } from '@angular/core/testing';
 import { AudioPlayerService } from './audio-player.service';
 import { Track } from '../models/track';
-import { vi } from 'vitest'; // <--- DAROORI: Import dyal Vitest
+import { vi } from 'vitest';
 
 describe('AudioPlayerService', () => {
   let service: AudioPlayerService;
@@ -17,11 +17,8 @@ describe('AudioPlayerService', () => {
     });
     service = TestBed.inject(AudioPlayerService);
 
-    // MOCKING AUDIO AVEC VITEST
     const audioMock = (service as any).audio;
 
-    // CORRECTION HNA: "vi.spyOn" blast "spyOn"
-    // w ".mockResolvedValue" blast ".and.returnValue"
     vi.spyOn(audioMock, 'play').mockImplementation(() => Promise.resolve());
     vi.spyOn(audioMock, 'pause').mockImplementation(() => {});
     vi.spyOn(audioMock, 'load').mockImplementation(() => {});
@@ -42,12 +39,10 @@ describe('AudioPlayerService', () => {
   it('should toggle play/pause', () => {
     const audio = (service as any).audio;
 
-    // Force paused state
     Object.defineProperty(audio, 'paused', { value: true, writable: true });
     service.togglePlay();
     expect(audio.play).toHaveBeenCalled();
 
-    // Force playing state
     Object.defineProperty(audio, 'paused', { value: false, writable: true });
     service.togglePlay();
     expect(audio.pause).toHaveBeenCalled();
