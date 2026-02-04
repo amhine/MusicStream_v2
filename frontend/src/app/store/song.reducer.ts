@@ -1,9 +1,9 @@
 import { createReducer, on } from '@ngrx/store';
 import { loadSongs, loadSongsSuccess, loadSongsFailure } from './song.actions';
-import { Song } from '../models/song.model';
+import { Track } from '../core/models/track';
 
 export interface SongState {
-  songs: Song[];
+  songs: Track[];
   loading: boolean;
   error: string | null;
 }

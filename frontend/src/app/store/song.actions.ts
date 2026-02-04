@@ -1,11 +1,11 @@
 import { createAction, props } from '@ngrx/store';
-import { Song } from '../models/song.model';
+import { Track } from '../core/models/track';
 
 export const loadSongs = createAction('[Song List] Load Songs');
 
 export const loadSongsSuccess = createAction(
   '[Song List] Load Songs Success',
-  props<{ songs: Song[] }>()
+  props<{ songs: Track[] }>()
 );
 
 export const loadSongsFailure = createAction(

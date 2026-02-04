@@ -17,6 +17,9 @@ export class TrackService {
   constructor() {
     this.loadTracks();
   }
+  getAllTracks() {
+    return this.http.get<Track[]>(this.apiUrl);
+  }
 
   async loadTracks() {
     this.loading.set(true);
