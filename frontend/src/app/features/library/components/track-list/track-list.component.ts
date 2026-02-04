@@ -17,7 +17,7 @@ export class TrackListComponent {
   @Input() isLoading = false;
   @Input() searchQuery = '';
   playerService = inject(AudioPlayerService);
-  router = inject(Router); // Inject Router
+  router = inject(Router);
 
   playTrack(track: Track) {
     this.playerService.setPlaylist(this.tracks);

@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, ChangeDetectorRef } from '@angular/core'; // <-- 1. Import CDR
+import { Component, OnInit, inject, ChangeDetectorRef } from '@angular/core';
 import { CommonModule, Location } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
@@ -50,7 +50,6 @@ export class TrackDetailComponent implements OnInit {
 
   play() {
     if (this.track) {
-      // Utiliser le playerService au lieu de créer un nouvel Audio
       this.playerService.playTrack(this.track);
     }
   }
@@ -86,25 +85,19 @@ export class TrackDetailComponent implements OnInit {
   saveEdit() {
     if (this.editForm.valid && this.track) {
 
-      // Khoud l-valeurs mn Formulaire
       const formValue = this.editForm.value;
 
-      // Créer l'objet updatedTrack b tariqa safe (bach t-eviter null)
       const updatedTrack: Track = {
-        ...this.track, // Hafed 3la id w filePath dyl qdim
-
-        // Hna kanqolo: Ila kan null, 3tih '' (chaine vide)
+        ...this.track,
         title: formValue.title || '',
         artist: formValue.artist || '',
         category: formValue.category || '',
         description: formValue.description || ''
       };
 
-      // Appel l Service
       this.trackService.updateTrack(updatedTrack).then(res => {
         this.track = res;
         this.isEditing = false;
-        // alert('Mise à jour réussie!'); // Optionnel
       }).catch(err => {
         console.error(err);
       });

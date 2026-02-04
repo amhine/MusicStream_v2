@@ -42,7 +42,7 @@ export class AudioPlayerService {
         ? track.songUrl
         : `${baseUrl}/${track.songUrl}`;
 
-      console.log('URL demandée :', fullUrl); // Doit afficher : .../api/songs/files/uuid.mp3
+      console.log('URL demandée :', fullUrl);
 
       this.audio.src = fullUrl;
       this.currentTrack.set(track);
