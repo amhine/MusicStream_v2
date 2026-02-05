@@ -25,7 +25,7 @@ export class ErrorInterceptor implements HttpInterceptor {
           errorMessage = `Code: ${error.status}\nMessage: ${error.message}`;
 
           if (error.status === 401) {
-            console.log("Khassk t-connecta!");
+            console.log("tu veux connecta!");
           }
         }
 

@@ -8,16 +8,17 @@ import { AudioState, PlayerState } from '../models/player-state';
 export class AudioPlayerService {
   private audio = new Audio();
 
-  state = signal<AudioState>('stopped');
-  currentTrack = signal<Track | null>(null);
-  currentTime = signal<number>(0);
-  duration = signal<number>(0);
-  volume = signal<number>(1);
+  state = signal<AudioState>('stopped');//etat reactif  play wla pause ..
+  currentTrack = signal<Track | null>(null);//track en cours
+  currentTime = signal<number>(0);//le temps actuelle
+  duration = signal<number>(0);//duree total d chanson
+  volume = signal<number>(1);//volume entre 0 et 1
   playlist = signal<Track[]>([]);
   constructor() {
     this.initAudioEvents();
   }
 
+//mit a jour le temps de musique
   private initAudioEvents() {
     this.audio.ontimeupdate = () => this.currentTime.set(this.audio.currentTime);
     this.audio.onended = () => {
@@ -32,7 +33,6 @@ export class AudioPlayerService {
   playTrack(track: Track) {
     this._playFile(track);
   }
-
   private _playFile(track: Track) {
     if (track.songUrl) {
 
